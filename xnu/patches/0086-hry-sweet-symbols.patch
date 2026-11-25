@@ -1,0 +1,28 @@
+--- a/osfmk/console/serial_console.c
++++ b/osfmk/console/serial_console.c
+@@ -268,11 +268,9 @@
+  */
+ #if defined(ARM64_BOARD_CONFIG_SWEET)
+ extern void sweet_log_append(const char *c, int size);  /* bsd/dev/sweet_ufs.c */
+-/*
+- * Set by AppleCLCD (boot-arg sweetfb_noconsole=1) once the GUI presents:
+- * console text still goes to the persistent log, but is not drawn over
+- * the GUI. A panic draws again.
+- */
++#endif
++/* Muted by AppleCLCD with sweetfb_noconsole=1; HRY needs the storage too. */
++#if defined(ARM64_BOARD_CONFIG_SWEET) || defined(ARM64_BOARD_CONFIG_HRY)
+ int sweet_console_muted;
+ #endif
+ 
+--- a/osfmk/kern/exception.c
++++ b/osfmk/kern/exception.c
+@@ -820,7 +820,7 @@
+ 	return exception_triage_thread(exception, code, codeCnt, thread);
+ }
+ 
+-#if defined(ARM64_BOARD_CONFIG_SWEET)
++#if defined(ARM64_BOARD_CONFIG_SWEET) || defined(ARM64_BOARD_CONFIG_HRY)
+ #include <vm/vm_shared_region.h>
+ #include <arm/thread.h>
+ 
