@@ -1,0 +1,24 @@
+diff --git a/pexpert/arm/pe_fiq.c b/pexpert/arm/pe_fiq.c
+--- a/pexpert/arm/pe_fiq.c
++++ b/pexpert/arm/pe_fiq.c
+@@ -258,7 +258,7 @@ pe_init_fiq()
+ 
+ #if defined(HRY)
+ 	/* EOI mode 0: one GICC_EOIR write acknowledges and deactivates. */
+-	_gic_write32(gicc_base + GICC_CTLR, GICC_CTLR_ENABLEGRP1);
++	_gic_write32(gicc_base + GICC_CTLR, GICC_CTLR_ENABLE | GICC_CTLR_ENABLEGRP1);
+ 	_gic_write32(gicd_base + GICD_CTLR, GICD_CTLR_ENABLEGRP1_V2);
+ #elif defined(SWEET)
+ 	// ABL leaves only ARE_NS set; Linux writes ARE_NS | EnableGrp1A | EnableGrp1
+diff --git a/pexpert/pexpert/arm64/SWEET.h b/pexpert/pexpert/arm64/SWEET.h
+--- a/pexpert/pexpert/arm64/SWEET.h
++++ b/pexpert/pexpert/arm64/SWEET.h
+@@ -100,6 +100,7 @@
+ #define GICC_BPR                                0x008
+ #define GICC_IAR                                0x00c
+ #define GICC_EOIR                               0x010
+-#define GICC_CTLR_ENABLEGRP1                    0x1
++#define GICC_CTLR_ENABLE                        0x1
++#define GICC_CTLR_ENABLEGRP1                    0x2
+ 
+ #endif /* ! _PEXPERT_ARM64_SWEET_H */
