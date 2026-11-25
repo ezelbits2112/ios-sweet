@@ -33,7 +33,10 @@ env:
   DXB_SHA: 663906528d1cd5ea8fde7de6f16de73db9511549
   MACOS_VERSION: ${{ inputs.macos_version || '13.5' }}
   KERNEL_CONFIG: ${{ inputs.kernel_config || 'DEVELOPMENT' }}
-  MACHINE_CONFIG: ${{ inputs.machine_config || 'SWEET' }}
+  # workflow_dispatch inputs were not reaching make in run 45666462043
+  # (buildtree was DEVELOPMENT_ARM64_SWEET despite -f machine_config=HRY).
+  # Pin HRY directly: this fork's CI exists for the Kirin 710 bring-up.
+  MACHINE_CONFIG: HRY
   XCODE: ${{ inputs.xcode || '16.4' }}
 
 jobs:
@@ -77,7 +80,9 @@ jobs:
         env:
           # keep going after errors so one run reports every compile failure
           MAKEFLAGS: ${{ inputs.keep_going == 'false' && '' || '-k' }}
-        run: bash build.sh
+        run: |
+          echo "MACHINE_CONFIG=$MACHINE_CONFIG KERNEL_CONFIG=$KERNEL_CONFIG XCODE=$XCODE"
+          bash build.sh
 
       - name: Package build tree for local compiles
         if: always()
