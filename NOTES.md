@@ -1,5 +1,23 @@
 # iOS 16 on sweet (Redmi Note 10 Pro, SM7150) - working notes
 
+## HRY fork handoff (2026-11-25, read first)
+
+This fork (`ezelbits2112/ios-sweet`) carries a separate bring-up for the
+Honor 10 Lite / Kirin 710 (Hi3670). The active handoff lives in
+`/home/ezeltech/hry/NOTES.md`; hardware dumps, ADT and QEMU scripts are in
+`/home/ezeltech/hry/kirin/`. Do not publish IPSWs or device backups.
+
+- `df4bc29` adds `xnu/patches/0082-hry-gicv2.patch`: `MACHINE_CONFIG=HRY`,
+  GIC-400 MMIO, and an HRY-only skip of a false task-ledger aggregate panic.
+- `0135041` switches `xnu.yml` to `macos-15-intel` + Xcode 16.4 because
+  GitHub retired `macos-14` and hosted images no longer include Xcode 15;
+  `xnu/patches/0083-xcode16-iig-kernelcontent.patch` supplies the
+  `IORPC.kernelContent` field emitted by the newer `iig`.
+- HRY CI run `45661274482` (`workflow_dispatch`, `machine_config=HRY`) was
+  started at this handoff; watch/download with `kirin/ci-hry.sh`. No HRY
+  kernel binary had been obtained yet. Do not flash the device until QEMU
+  boots without a panic.
+
 ## Agent handoff / active work (2026-10-15, latest)
 
 ### >>> UPDATE 2026-10-18 (read first, then the 10-17 handoff below) <<<
