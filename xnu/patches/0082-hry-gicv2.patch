@@ -1,0 +1,486 @@
+diff --git a/config/MASTER.arm64.hry b/config/MASTER.arm64.hry
+new file mode 100644
+index 0000000..5be10c8
+--- /dev/null
++++ b/config/MASTER.arm64.hry
+@@ -0,0 +1,117 @@
++#
++# hry (Honor 10 Lite, Hi3670/Kirin 710): generic-ARM SWEET config
++# (open-source arm64 asm/pmap, HFS+ ramroot, launchd fixes) with GIC-400
++# instead of GICv3. MASTER.arm64.MacOSX plus the open-source
++# arm64 assembly and pmap (nos_arm_asm, nos_arm_pmap). Apple's own SoC configs
++# link those from the KDK's closed lib<SOC>.os.<CONFIG>.a instead, which is
++# arm64e and Apple-silicon specific. kperf/kpc stay (xnu does not build without
++# kperf); osfmk/arm64/kpc.c is a stub with no hardware counters.
++#
++#
++# Mach Operating System
++# Copyright (c) 1986 Carnegie-Mellon University
++# Copyright 2001-2018 Apple Inc.
++#
++# All rights reserved.  The CMU software License Agreement
++# specifies the terms and conditions for use and redistribution.
++#  
++######################################################################
++#
++#  Master Apple configuration file (see the master machine independent
++#  configuration file for a description of the file format).
++#
++######################################################################
++#  
++#  Standard Apple OS Configurations:
++#  -------- ----- -- ---------------
++#
++#  KERNEL_BASE =    [ arm64 config_pmap_ppl medium msgb_large config_requires_u32_munging config_delay_idle_sleep config_proc_udata_storage config_uexc config_darkboot nos_arm_asm nos_arm_pmap ]
++#  KERNEL_RELEASE = [ KERNEL_BASE ]
++#  KERNEL_DEV =     [ KERNEL_BASE development mach_assert config_xnupost proc_ref_debug config_proc_resource_limits ]
++#  KERNEL_DEBUG =   [ KERNEL_BASE debug mach_assert config_xnupost config_waitq_stats config_workloop_debug config_proc_resource_limits ]
++#  BSD_BASE =       [ mach_bsd sysv_sem sysv_msg sysv_shm config_netboot config_imageboot psynch config_proc_uuid_policy config_coredump pgo config_personas ]
++#  BSD_RELEASE =    [ BSD_BASE ]
++#  BSD_DEV =        [ BSD_BASE config_vnguard ]
++#  BSD_DEBUG =      [ BSD_BASE config_vnguard ]
++#  FILESYS_BASE =   [ devfs fdesc fifo mockfs sweet_hfs fs_compression config_protect config_mnt_rootsnap config_rosv_startup config_mount_vm config_mount_prebootrecovery config_basesystemroot config_fse quota namedstreams config_imgsrc_access config_triggers config_searchfs config_volfs config_appledouble nullfs bindfs config_mnt_suid config_firmlinks config_dataless_files config_union_mounts config_file_leases ]
++#  FILESYS_RELEASE= [ FILESYS_BASE ]
++#  FILESYS_DEV =    [ FILESYS_BASE config_iocount_trace ]
++#  FILESYS_DEBUG =  [ FILESYS_BASE config_iocount_trace ]
++#  NFS =            [ nfsserver ]
++#  SKYWALK_BASE =   [ skywalk config_nexus_user_pipe config_nexus_kernel_pipe config_nexus_monitor config_nexus_flowswitch config_nexus_netif ]
++#  SKYWALK_RELEASE = [ SKYWALK_BASE ]
++#  SKYWALK_DEV =    [ SKYWALK_BASE ]
++#  SKYWALK_DEBUG =  [ SKYWALK_BASE ]
++#  NETWORKING =     [ inet bpfilter dummynet traffic_mgt sendfile ah_all_crypto bond vlan gif stf ifnet_input_chk config_mbuf_jumbo if_bridge MULTIPATH if_fake remote_vif ]
++#  NETWORKING_RELEASE = [ NETWORKING ]
++#  NETWORKING_DEV = [ NETWORKING_RELEASE packet_mangler if_headless ]
++#  NETWORKING_DEBUG = [ NETWORKING_DEV ]
++#  VPN =            [ ipsec flow_divert necp content_filter ]
++#  PF =             [ pf pflog ]
++#  MULTIPATH =      [ multipath mptcp ]
++#if SOC_CONFIG_t8020 || SOC_IS_VIRTUALIZED
++#  HIBERNATION =    [ ]
++#else /*!(SOC_CONFIG_t8020 || SOC_IS_VIRTUALIZED)*/
++#  HIBERNATION =    [ ]
++#endif /*SOC_CONFIG_t8020 || SOC_IS_VIRTUALIZED*/
++#  IOKIT_BASE =     [ iokit iokitcpp no_kernel_hid config_sleep iokitstats HIBERNATION ]
++#  IOKIT_RELEASE =  [ IOKIT_BASE ]
++#  IOKIT_DEV =      [ IOKIT_BASE iotracking ]
++#  IOKIT_DEBUG =    [ IOKIT_BASE iotracking ]
++#  LIBKERN_BASE =   [ libkerncpp config_blocks config_kec_fips crypto_sha2 config_img4 ]
++#  LIBKERN_RELEASE =[ LIBKERN_BASE zlib ]
++#  LIBKERN_DEV =    [ LIBKERN_BASE zlib iotracking ]
++#  LIBKERN_DEBUG =  [ LIBKERN_BASE zlib iotracking ]
++#  PERF_DBG_BASE =  [ config_dtrace mach_kdp config_serial_kdp kdp_interactive_debugging config_kdp_coredump_encryption config_pervasive_energy PERFMON_BASE kperf kpc ]
++#  PERF_DBG_RELEASE=[ PERF_DBG_BASE ist_kdebug ]
++#  PERF_DBG_DEV =   [ PERF_DBG_BASE lock_stats zleaks alternate_debugger sched_hygiene_debug config_debug_syscall_rejection config_iotrace ]
++#  PERF_DBG_DEBUG = [ PERF_DBG_BASE lock_stats zleaks alternate_debugger sched_hygiene_debug config_debug_syscall_rejection config_iotrace ]
++#if SOC_IS_VIRTUALIZED
++#  PARAVIRT_BASE =  [ config_pv_ticket ]
++#else
++#  PARAVIRT_BASE =  [ ]
++#endif /*SOC_IS_VIRTUALIZED*/
++#  MACH_BASE =      [ mach config_ecc_logging vc_progress_white importance_inheritance config_atm config_coalitions config_iosched config_sysdiagnose config_telemetry config_mach_bridge_recv_time config_quiesce_counter config_arm_pfz config_user_notification phys_write_acct config_service_port_info config_voucher_deprecated PARAVIRT_BASE config_ledger_interval_max ]
++#  MACH_RELEASE =   [ MACH_BASE ]
++#  MACH_DEV =       [ MACH_BASE config_io_accounting importance_trace ]
++#  MACH_DEBUG =     [ MACH_BASE config_io_accounting importance_trace importance_debug ]
++#  SCHED_BASE =     [ config_sched_traditional config_sched_multiq config_sched_deferred_ast config_clutch config_sched_sfi config_sched_auto_join config_preadopt_tg ]
++#  SCHED_RELEASE =  [ SCHED_BASE ]
++#  SCHED_DEV =      [ SCHED_BASE ]
++#  SCHED_DEBUG =    [ SCHED_BASE config_sched_grrr config_sched_proto ]
++#  VM_BASE =        [ vm_pressure_events memorystatus config_code_decryption encrypted_swap config_deferred_reclaim ]
++#  VM_RELEASE =     [ VM_BASE ]
++#  VM_DEV =         [ VM_BASE dynamic_codesigning pgzalloc ]
++#  VM_DEBUG =       [ VM_BASE dynamic_codesigning pgzalloc ]
++#  VM_KASAN =       [ VM_BASE dynamic_codesigning config_kasan config_ubsan config_kcov config_ksancov kernel_tbi ]
++#  SECURITY =       [ config_macf config_audit kernel_integrity config_csr config_csr_from_dt config_setuid config_kas_info config_secure_bsd_root config_arcade config_supplemental_signatures second_static_trust_cache reslide_shared_cache ]
++#  BASE =           [ PF VPN SECURITY NFS ]
++#  RELEASE =        [ BASE KERNEL_RELEASE BSD_RELEASE FILESYS_RELEASE SKYWALK_RELEASE NETWORKING_RELEASE IOKIT_RELEASE LIBKERN_RELEASE    PERF_DBG_RELEASE MACH_RELEASE SCHED_RELEASE VM_RELEASE ]
++#  DEVELOPMENT =    [ BASE KERNEL_DEV     BSD_DEV     FILESYS_DEV     SKYWALK_DEV     NETWORKING_DEV     IOKIT_DEV     LIBKERN_DEV        PERF_DBG_DEV     MACH_DEV     SCHED_DEV     VM_DEV     ]
++#  DEBUG =          [ BASE KERNEL_DEBUG   BSD_DEBUG   FILESYS_DEBUG   SKYWALK_DEBUG   NETWORKING_DEBUG   IOKIT_DEBUG   LIBKERN_DEBUG      PERF_DBG_DEBUG   MACH_DEBUG   SCHED_DEBUG   VM_DEBUG   ]
++#  KASAN =          [ BASE KERNEL_DEV     BSD_DEV     FILESYS_DEV     SKYWALK_DEV     NETWORKING_DEV     IOKIT_DEV     LIBKERN_DEV        PERF_DBG_DEV     MACH_DEV     SCHED_DEV     VM_KASAN   ]
++#
++######################################################################
++#
++machine		"arm64"						# <arm64>
++
++makeoptions	OSFMK_MACHINE = "arm64"				# <mach>
++
++options		COUNT_SYSCALLS		# count bsd system calls 	# <countcalls>
++options     TRASH_VFP_ON_SAVE   # <debug,trash_vfp>
++options		ALTERNATE_DEBUGGER	# <alternate_debugger>
++
++options   CONFIG_VNODES=1024		# <xsmall>
++
++options   CONFIG_FREEZE_SUSPENDED_MIN=4		# <xsmall>
++
++options	  CONFIG_MACH_APPROXIMATE_TIME
++
++options   CONFIG_KERNEL_INTEGRITY		# <kernel_integrity>
++
++options CONFIG_MACF_LAZY_VNODE_LABELS   # Turn on labels, don't preallocate
++
++options CONFIG_HYPERVISOR_PUBLIC   # unrestricted entitlement for hypervisor
++
++options   CONFIG_RESLIDE_SHARED_CACHE		# <reslide_shared_cache>
++options   CONFIG_KERNEL_TBI		# <kernel_tbi>
+diff --git a/makedefs/MakeInc.def b/makedefs/MakeInc.def
+index 9a748ea..548e3ea 100644
+--- a/makedefs/MakeInc.def
++++ b/makedefs/MakeInc.def
+@@ -29,7 +29,7 @@ SUPPORTED_ARM64_MACHINE_CONFIGS = NONE
+ else ifneq ($(findstring _host,$(RC_ProjectName)),)
+ SUPPORTED_ARM64_MACHINE_CONFIGS = NONE
+ else
+-SUPPORTED_ARM64_MACHINE_CONFIGS = BCM2837 T6000 T8101 T8103 VMAPPLE SWEET
++SUPPORTED_ARM64_MACHINE_CONFIGS = BCM2837 T6000 T8101 T8103 VMAPPLE SWEET HRY
+ 
+ endif
+ 
+@@ -62,6 +62,7 @@ MACHINE_FLAGS_ARM64_T6000 = -DARM64_BOARD_CONFIG_T6000 		-mcpu=apple-a14
+ MACHINE_FLAGS_ARM64_VMAPPLE = -DARM64_BOARD_CONFIG_VMAPPLE              -march=armv8.5a
+ MACHINE_FLAGS_ARM64_BCM2837 = -DARM64_BOARD_CONFIG_BCM2837
+ MACHINE_FLAGS_ARM64_SWEET = -DARM64_BOARD_CONFIG_SWEET                -march=armv8.2-a+crypto
++MACHINE_FLAGS_ARM64_HRY = -DARM64_BOARD_CONFIG_HRY -DHRY            -march=armv8-a+crypto
+ 
+ 
+ #
+@@ -262,9 +263,11 @@ export ARCH_STRING_FOR_CURRENT_MACHINE_CONFIG := $(shell echo $(CURRENT_ARCH_CON
+ ifneq ($(filter arm64,$(ARCH_STRING_FOR_CURRENT_MACHINE_CONFIG)),)
+ # sweet's Cortex-A76/A55 have no pointer authentication: stay plain arm64
+ ifneq ($(CURRENT_MACHINE_CONFIG),SWEET)
++ifneq ($(CURRENT_MACHINE_CONFIG),HRY)
+ export ARCH_STRING_FOR_CURRENT_MACHINE_CONFIG := arm64e
+ endif
+ endif
++endif
+ 
+ endif
+ 
+diff --git a/osfmk/arm64/sleh.c b/osfmk/arm64/sleh.c
+index 24f1abc..182eb5b 100644
+--- a/osfmk/arm64/sleh.c
++++ b/osfmk/arm64/sleh.c
+@@ -1856,12 +1856,17 @@ sleh_irq(arm_saved_state_t *state)
+ #endif
+ 
+ 
+-#if defined(SWEET)
++#if defined(HRY) || defined(SWEET)
++#if defined(HRY)
++	/* Kirin's GIC-400 has a memory-mapped CPU interface (no ICC_* sysregs). */
++	uint32_t iar = hry_gic_iar();
++#else
+ 	/*
+ 	 * sweet: TrustZone owns GIC Group 0, so the timer and IPIs that other
+ 	 * ARM64 targets take as FIQs arrive here as Group 1 IRQs.
+ 	 */
+ 	uint64_t iar = __builtin_arm_rsr64("ICC_IAR1_EL1");
++#endif
+ 	uint32_t intid = (uint32_t)(iar & 0xFFFFFF);
+ 
+ 	if (intid >= 1020 && intid <= 1023) {
+@@ -1873,11 +1878,19 @@ sleh_irq(arm_saved_state_t *state)
+ 		INTERRUPT_MASKED_DEBUG_START(rtclock_intr, DBG_INTR_TYPE_TIMER);
+ 		rtclock_intr(TRUE);
+ 		INTERRUPT_MASKED_DEBUG_END();
++#if defined(HRY)
++		hry_gic_eoi(iar);
++#else
+ 		__builtin_arm_wsr64("ICC_EOIR1_EL1", iar);
++#endif
+ 	} else if (intid < 16) {
+ 		sleh_interrupt_handler_prologue(state, DBG_INTR_TYPE_IPI);
+ 		/* Ack before handling so an IPI raised meanwhile is not lost */
++#if defined(HRY)
++		hry_gic_eoi(iar);
++#else
+ 		__builtin_arm_wsr64("ICC_EOIR1_EL1", iar);
++#endif
+ 		__builtin_arm_isb(ISB_SY);
+ 		cpu_signal_handler();
+ 	} else {
+@@ -1888,7 +1901,11 @@ sleh_irq(arm_saved_state_t *state)
+ 			    cdp->interrupt_nub,
+ 			    intid);
+ 		}
++#if defined(HRY)
++		hry_gic_eoi(iar);
++#else
+ 		__builtin_arm_wsr64("ICC_EOIR1_EL1", iar);
++#endif
+ 	}
+ 	__builtin_arm_isb(ISB_SY);
+ #else
+@@ -1903,7 +1920,7 @@ sleh_irq(arm_saved_state_t *state)
+ 	    cdp->interrupt_nub,
+ 	    cdp->interrupt_source);
+ #endif
+-#endif /* SWEET */
++#endif /* HRY || SWEET */
+ 
+ 	entropy_collect();
+ 
+diff --git a/osfmk/kern/task.c b/osfmk/kern/task.c
+index 67c5f79..45180ee 100644
+--- a/osfmk/kern/task.c
++++ b/osfmk/kern/task.c
+@@ -1205,6 +1205,8 @@ init_task_ledgers(void)
+ 	task_ledgers.swapins = ledger_entry_add_with_flags(t, "swapins", "physmem", "bytes",
+ 	    LEDGER_ENTRY_ALLOW_PANIC_ON_NEGATIVE);
+ 
++#if !defined(ARM64_BOARD_CONFIG_HRY)
++	/* Compiler miscompiles this aggregate check on generic arm64; skip on HRY. */
+ 	if ((task_ledgers.cpu_time < 0) ||
+ 	    (task_ledgers.tkm_private < 0) ||
+ 	    (task_ledgers.tkm_shared < 0) ||
+@@ -1264,6 +1266,7 @@ init_task_ledgers(void)
+ 	    ) {
+ 		panic("couldn't create entries for task ledger template");
+ 	}
++#endif /* !ARM64_BOARD_CONFIG_HRY */
+ 
+ 	ledger_track_credit_only(t, task_ledgers.phys_footprint);
+ 	ledger_track_credit_only(t, task_ledgers.internal);
+diff --git a/pexpert/arm/pe_fiq.c b/pexpert/arm/pe_fiq.c
+index 6089db9..73adab2 100644
+--- a/pexpert/arm/pe_fiq.c
++++ b/pexpert/arm/pe_fiq.c
+@@ -13,7 +13,7 @@
+ #include <pexpert/arm64/board_config.h>
+ 
+ 
+-#if HAS_GIC_V3
++#if HAS_GIC_V3 || HAS_GIC_V2
+ #define GICR_WAKE_TIMEOUT_NS (1000000000ULL) // timeout for redistributor wakeup (default 1s)
+ MACHINE_TIMEOUT(gicr_wake_timeout_ns, "gicr-wake-timeout", GICR_WAKE_TIMEOUT_NS, MACHINE_TIMEOUT_UNIT_NSEC, NULL);
+ 
+@@ -23,8 +23,13 @@ SECURITY_READ_ONLY_LATE(uint32_t) sweet_vtimer_intid = SWEET_VTIMER_INTID;
+ #endif
+ 
+ static vm_offset_t gicd_base;
++#if HAS_GIC_V2
++static vm_offset_t gicc_base;
++#endif
++#if HAS_GIC_V3
+ static vm_offset_t gicr_base;
+ static vm_offset_t gicr_size;
++#endif
+ 
+ static uint32_t
+ _gic_read32(vm_offset_t addr)
+@@ -32,11 +37,13 @@ _gic_read32(vm_offset_t addr)
+ 	return *((volatile uint32_t *) addr);
+ }
+ 
++#if HAS_GIC_V3
+ static uint64_t
+ _gic_read64(vm_offset_t addr)
+ {
+ 	return *((volatile uint64_t *) addr);
+ }
++#endif
+ 
+ static void
+ _gic_write32(vm_offset_t addr, uint32_t value)
+@@ -46,6 +53,8 @@ _gic_write32(vm_offset_t addr, uint32_t value)
+ 
+ #define gicd_read32(offset) (_gic_read32(gicd_base + (offset)))
+ #define gicd_write32(offset, data) (_gic_write32(gicd_base + (offset), (data)))
++
++#if HAS_GIC_V3
+ #define gicr_read32(offset) (_gic_read32(gicr_pe_base + (offset)))
+ #define gicr_write32(offset, data) (_gic_write32(gicr_pe_base + (offset), (data)))
+ #define gicr_read64(offset) (_gic_read64(gicr_pe_base + (offset)))
+@@ -72,6 +81,21 @@ find_gicr_pe_base()
+ 
+ 	panic("%s: cannot find GICR base for core %u", __func__, ml_get_cpu_number(phys_id));
+ }
++#endif /* HAS_GIC_V3 */
++
++#if HAS_GIC_V2
++uint32_t
++hry_gic_iar(void)
++{
++	return _gic_read32(gicc_base + GICC_IAR);
++}
++
++void
++hry_gic_eoi(uint32_t iar)
++{
++	_gic_write32(gicc_base + GICC_EOIR, iar);
++}
++#endif /* HAS_GIC_V2 */
+ 
+ void
+ pe_init_fiq()
+@@ -123,8 +147,14 @@ pe_init_fiq()
+ 
+ 		uint64_t const gicd_base_prop = ((uint64_t const *) prop)[0];
+ 		uint64_t const gicd_size_prop = ((uint64_t const *) prop)[1];
++#if HAS_GIC_V3
+ 		uint64_t const gicr_base_prop = ((uint64_t const *) prop)[2];
+ 		uint64_t const gicr_size_prop = ((uint64_t const *) prop)[3];
++#else
++		/* GICv2: the second reg pair is GICC, not a redistributor. */
++		uint64_t const gicc_base_prop = ((uint64_t const *) prop)[2];
++		uint64_t const gicc_size_prop = ((uint64_t const *) prop)[3];
++#endif
+ 
+ 		// Find GICD base address
+ 		gicd_base = ml_io_map(soc_base_phys + gicd_base_prop, gicd_size_prop);
+@@ -133,6 +163,7 @@ pe_init_fiq()
+ 			panic("%s: cannot map GICD region", __func__);
+ 		}
+ 
++#if HAS_GIC_V3
+ 		// Find GICR base address
+ 		gicr_base = ml_io_map(soc_base_phys + gicr_base_prop, gicr_size_prop);
+ 
+@@ -141,8 +172,16 @@ pe_init_fiq()
+ 		}
+ 
+ 		gicr_size = gicr_size_prop;
++#else
++		gicc_base = ml_io_map(soc_base_phys + gicc_base_prop, gicc_size_prop);
++
++		if (!gicc_base) {
++			panic("%s: cannot map GICC region", __func__);
++		}
++#endif
+ 	}
+ 
++#if HAS_GIC_V3
+ 	// Find the redistributor for this processor
+ 	vm_offset_t gicr_pe_base = find_gicr_pe_base();
+ 
+@@ -163,8 +202,16 @@ pe_init_fiq()
+ 			}
+ 		}
+ 	}
++#endif /* HAS_GIC_V3 */
+ 
+-#if defined(SWEET)
++#if defined(HRY)
++	/* GIC-400: all interrupts we own are non-secure Group 1 IRQs. */
++	gicd_write32(GICD_IGROUPR0, 0xFFFFFFFF);
++	for (unsigned int i = 0; i < 32; i += 4) {
++		gicd_write32(GICD_IPRIORITYR0 + i, 0xA0A0A0A0);
++	}
++	gicd_write32(GICD_ISENABLER0, (1U << sweet_vtimer_intid) | (1U << SWEET_IPI_SGI));
++#elif defined(SWEET)
+ 	/*
+ 	 * Real hardware with two security states: Group 0 is TrustZone's and
+ 	 * non-secure writes to it are ignored. Everything we own is Group 1 NS
+@@ -184,6 +231,11 @@ pe_init_fiq()
+ 	gicr_write32(GICR_ISENABLER0, (1 << 27));
+ #endif /* SWEET */
+ 
++#if defined(HRY)
++	/* GICv2 has no ICC_* system registers: program GICC through MMIO. */
++	_gic_write32(gicc_base + GICC_BPR, 0);
++	_gic_write32(gicc_base + GICC_PMR, 0xFF);
++#else
+ 	// Enable system register access
+ 	uint64_t icc_sre = __builtin_arm_rsr64("ICC_SRE_EL1");
+ 	icc_sre |= ICC_SRE_SRE;
+@@ -202,8 +254,13 @@ pe_init_fiq()
+ 	uint64_t icc_ctlr = __builtin_arm_rsr64("ICC_CTLR_EL1");
+ 	icc_ctlr &= ~ICC_CTLR_EOIMODE;
+ 	__builtin_arm_wsr64("ICC_CTLR_EL1", icc_ctlr);
++#endif /* !HRY */
+ 
+-#if defined(SWEET)
++#if defined(HRY)
++	/* EOI mode 0: one GICC_EOIR write acknowledges and deactivates. */
++	_gic_write32(gicc_base + GICC_CTLR, GICC_CTLR_ENABLEGRP1);
++	_gic_write32(gicd_base + GICD_CTLR, GICD_CTLR_ENABLEGRP1_V2);
++#elif defined(SWEET)
+ 	// ABL leaves only ARE_NS set; Linux writes ARE_NS | EnableGrp1A | EnableGrp1
+ 	uint32_t gicd_ctlr = gicd_read32(GICD_CTLR);
+ 	gicd_ctlr |= GICD_CTLR_ARE_NS | GICD_CTLR_ENABLEGRP1A | GICD_CTLR_ENABLEGRP1;
+diff --git a/pexpert/pexpert/arm/protos.h b/pexpert/pexpert/arm/protos.h
+index 9004f2b..7f57c3a 100644
+--- a/pexpert/pexpert/arm/protos.h
++++ b/pexpert/pexpert/arm/protos.h
+@@ -39,6 +39,10 @@ void pe_init_fiq(void);
+ #if defined(ARM64_BOARD_CONFIG_SWEET)
+ extern uint32_t sweet_vtimer_intid;
+ #endif
++#if defined(ARM64_BOARD_CONFIG_HRY)
++extern uint32_t hry_gic_iar(void);
++extern void hry_gic_eoi(uint32_t iar);
++#endif
+ 
+ #ifdef PRIVATE
+ /**
+diff --git a/pexpert/pexpert/arm64/SWEET.h b/pexpert/pexpert/arm64/SWEET.h
+index b99c2f4..9f60a6b 100644
+--- a/pexpert/pexpert/arm64/SWEET.h
++++ b/pexpert/pexpert/arm64/SWEET.h
+@@ -17,6 +17,10 @@
+ 
+ #define SWEET                     1
+ 
++#if defined(ARM64_BOARD_CONFIG_HRY)
++#define HRY                       1
++#endif
++
+ /*
+  * All eight cores (six A55 + two A76) as one homogeneous SMP cluster:
+  * cpus=N is clamped here. Same ISA level (ARMv8.2), 64-byte lines, PSCI
+@@ -36,7 +40,12 @@
+ #define __ARM_PAN_AVAILABLE__     1
+ #define __ARM_16K_PG__            1
+ 
++#if defined(HRY)
++/* Kirin 710 has an ARM GIC-400: GICD + GICC, no redistributors. */
++#define HAS_GIC_V2                1
++#else
+ #define HAS_GIC_V3                1
++#endif
+ 
+ #ifndef ASSEMBLER
+ #define PLATFORM_PANIC_LOG_DISABLED
+@@ -80,4 +89,17 @@
+ #define ICC_SRE_SRE                             0x1
+ /* End of GICv3 register definitions */
+ 
++/* GICv2 (GIC-400): memory-mapped CPU interface, no ICC_* system registers. */
++#define GICD_IGROUPR0                           0x080
++#define GICD_ISENABLER0                         0x100
++#define GICD_IPRIORITYR0                        0x400
++#define GICD_CTLR_ENABLEGRP1_V2                 0x1
++
++#define GICC_CTLR                               0x000
++#define GICC_PMR                                0x004
++#define GICC_BPR                                0x008
++#define GICC_IAR                                0x00c
++#define GICC_EOIR                               0x010
++#define GICC_CTLR_ENABLEGRP1                    0x1
++
+ #endif /* ! _PEXPERT_ARM64_SWEET_H */
+diff --git a/pexpert/pexpert/arm64/board_config.h b/pexpert/pexpert/arm64/board_config.h
+index 88e524a..d900017 100644
+--- a/pexpert/pexpert/arm64/board_config.h
++++ b/pexpert/pexpert/arm64/board_config.h
+@@ -108,6 +108,22 @@
+ 
+ #endif  /* ARM64_BOARD_CONFIG_SWEET */
+ 
++#ifdef ARM64_BOARD_CONFIG_HRY
++/*
++ * Honor 10 Lite / Hi3670: 4x Cortex-A53 + 4x Cortex-A73, GIC-400 (GICv2).
++ * The hardware-agnostic SWEET work is reused; only the interrupt controller
++ * and ISA level differ.
++ */
++#include <pexpert/arm64/SWEET.h>
++
++#define MAX_L2_CLINE                   6
++#define MAX_CPUS                       8
++/* Start with one homogeneous cluster, like sweet: no P/E scheduler yet. */
++#define MAX_CPU_CLUSTERS               1
++#define CORE_NCTRS                     8
++
++#endif  /* ARM64_BOARD_CONFIG_HRY */
++
+ #ifdef ARM64_BOARD_CONFIG_VMAPPLE
+ #include <pexpert/arm64/VMAPPLE.h>
+ 
